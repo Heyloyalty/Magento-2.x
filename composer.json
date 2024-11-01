@@ -2,7 +2,7 @@
     "name": "heyloyalty/magento2-module",
     "description": "Module for https://heyloyalty.com/",
     "type": "magento2-module",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "license": [
       "MIT"
     ],
