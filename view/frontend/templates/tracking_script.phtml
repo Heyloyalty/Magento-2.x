@@ -39,8 +39,8 @@
     <!-- hlt.visit(productid, categoryid, categoryname)/()/(,,categoryname) -->
     <script>
         function hltVisit() {
-            let productId = <?= $product?->getId() ?? 'null' ?>;
-            let categoryId = <?= $category?->getId() ?? 'null' ?>;
+            let productId = "<?= $product?->getSku() ?? 'null' ?>";
+            let categoryId = "<?= $category?->getId() ?? 'null' ?>";
             let categoryName = "<?= $category?->getName() ?? null ?>";
             console.debug('HeyLoyalty :: HIT', {
                 productId,
@@ -56,7 +56,7 @@
                 return;
             }
             window.hlt.visit(
-                "<?= $product?->getId() ?? '' ?>",
+                "<?= $product?->getSku() ?? '' ?>",
                 "<?= $category?->getId() ?? '' ?>",
                 "<?= $category?->getName() ?? '' ?>"
             );
@@ -138,10 +138,10 @@
                 let add_to_cart = getAddedItems(initialCartData, cartUpdatedData);
                 let remove_from_cart = getRemovedItems(initialCartData, cartUpdatedData);
                 add_to_cart.forEach(function(item) {
-                    hltAddToBasket(item.product_id, item.qty);
+                    hltAddToBasket(item.product_sku, item.qty);
                 });
                 remove_from_cart.forEach(function(item) {
-                    hltRemoveFromBasket(item.product_id);
+                    hltRemoveFromBasket(item.product_sku);
                 });
                 initialCartData = cartUpdatedData;
             });
