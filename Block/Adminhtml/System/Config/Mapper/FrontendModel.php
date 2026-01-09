@@ -10,9 +10,16 @@ use Wexo\HeyLoyalty\Block\Adminhtml\System\Config\Dropdowns\MagentoFields;
 class FrontendModel extends AbstractFrontendModel
 {
     /**
+     * @var bool
+     */
+    public $_addAfter;
+    /**
+     * @var mixed
+     */
+    public $_addButtonLabel;
+    /**
      * Add columns and button
      *
-     * @return void
      * @throws LocalizedException
      */
     protected function _prepareToRender(): void
@@ -42,7 +49,6 @@ class FrontendModel extends AbstractFrontendModel
     /**
      * Get HeyLoyalty mapping fields
      *
-     * @return mixed
      * @throws LocalizedException
      */
     public function getHeyLoyaltyFields(): mixed
@@ -59,7 +65,6 @@ class FrontendModel extends AbstractFrontendModel
     /**
      * Get Magento 2 mapping fields
      *
-     * @return mixed
      * @throws LocalizedException
      */
     public function getMagentoFields(): mixed

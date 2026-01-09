@@ -2,9 +2,13 @@
 
 namespace Wexo\HeyLoyalty\Model;
 
+use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Filesystem;
+use Magento\Framework\Filesystem\DirectoryList;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Store\Model\StoreManager;
 use Psr\Log\LoggerInterface;
@@ -14,19 +18,19 @@ use Wexo\HeyLoyalty\Api\HeyLoyaltyConfigInterface;
 
 class HeyLoyaltyClient implements HeyLoyaltyClientInterface
 {
-    public const BASE_URI = 'https://api.heyloyalty.com/loyalty/v1/';
-    public const BASE_URI_V2 = 'https://api.heyloyalty.com/loyalty/v2/';
-    public const BI_URI = 'https://bi.heyloyalty.com/api/';
-    public const EXPORT_CSV_URL = 'wexo_heyloyalty/purchasehistory/csvexport';
+    public const string BASE_URI = 'https://api.heyloyalty.com/loyalty/v1/';
+    public const string BASE_URI_V2 = 'https://api.heyloyalty.com/loyalty/v2/';
+    public const string BI_URI = 'https://bi.heyloyalty.com/api/';
+    public const string EXPORT_CSV_URL = 'wexo_heyloyalty/purchasehistory/csvexport';
 
     public function __construct(
-        public \GuzzleHttp\Client $client,
+        public Client $client,
         public HeyLoyaltyConfigInterface $config,
         public Json $json,
         public LoggerInterface $logger,
         public StoreManager $storeManager,
-        public \Magento\Framework\Filesystem\DirectoryList $dir,
-        public \Magento\Framework\Filesystem $filesystem
+        public DirectoryList $dir,
+        public Filesystem $filesystem
     ) {
     }
 
@@ -261,6 +265,10 @@ class HeyLoyaltyClient implements HeyLoyaltyClientInterface
         return $this->vOneRequest("integrations/productfeed-mapping/{$feedId}", 'PUT', $payload);
     }
 
+    /**
+     * @throws FileSystemException
+     * @throws Exception
+     */
     public function exportPurchaseHistory(
         string $csvUrl,
         string $trackingId,
@@ -318,7 +326,7 @@ class HeyLoyaltyClient implements HeyLoyaltyClientInterface
         if (isset($response['status']) && $response['status'] !== 'error') {
             return $response;
         }
-        throw new \Exception($response['message']);
+        throw new Exception($response['message']);
     }
 
     public function vOneRequest(
@@ -424,7 +432,7 @@ class HeyLoyaltyClient implements HeyLoyaltyClientInterface
 
         foreach ($args as $index => $arg) {
             // Only include arguments that are key-value pairs
-            if ($index % 2 == 0 && isset($args[$index + 1])) {
+            if ($index % 2 === 0 && isset($args[$index + 1])) {
                 $key = $arg;
                 $value = $args[$index + 1];
 
