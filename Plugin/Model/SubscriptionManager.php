@@ -2,28 +2,36 @@
 
 namespace Wexo\HeyLoyalty\Plugin\Model;
 
+use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Newsletter\Model\Subscriber;
+use Psr\Log\LoggerInterface;
+use Wexo\HeyLoyalty\Api\HeyLoyaltyApiInterface;
+use Wexo\HeyLoyalty\Api\HeyLoyaltyConfigInterface;
+
 class SubscriptionManager
 {
     public function __construct(
-        public \Psr\Log\LoggerInterface $logger,
-        public \Wexo\HeyLoyalty\Api\HeyLoyaltyApiInterface $heyLoyaltyApi,
-        public \Wexo\HeyLoyalty\Api\HeyLoyaltyConfigInterface $heyLoyaltyConfig,
-        public \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository
+        public LoggerInterface $logger,
+        public HeyLoyaltyApiInterface $heyLoyaltyApi,
+        public HeyLoyaltyConfigInterface $heyLoyaltyConfig,
+        public CustomerRepositoryInterface $customerRepository
     ) {
     }
 
     public function afterSubscribe(
         \Magento\Newsletter\Model\SubscriptionManager $subject,
-        \Magento\Newsletter\Model\Subscriber $result
-    ) {
+        Subscriber $result
+    ): Subscriber {
         $this->subscribe($result);
         return $result;
     }
 
     public function afterUnsubscribe(
         \Magento\Newsletter\Model\SubscriptionManager $subject,
-        \Magento\Newsletter\Model\Subscriber $result
-    ) {
+        Subscriber $result
+    ): Subscriber {
         $this->unsubscribe($result);
         return $result;
     }
@@ -31,16 +39,14 @@ class SubscriptionManager
     /**
      * Subscribe customer to newsletter
      *
-     * @param int $customerId
-     * @param int $storeId
      * @return Subscriber
      */
     public function afterSubscribeCustomer(
         \Magento\Newsletter\Model\SubscriptionManager $subject,
-        \Magento\Newsletter\Model\Subscriber $result,
+        Subscriber $result,
         int $customerId,
         int $storeId
-    ) {
+    ): Subscriber {
         $this->subscribe($result, $customerId);
         return $result;
     }
@@ -48,21 +54,23 @@ class SubscriptionManager
     /**
      * Unsubscribe customer from newsletter
      *
-     * @param int $customerId
-     * @param int $storeId
      * @return Subscriber
      */
     public function afterUnsubscribeCustomer(
         \Magento\Newsletter\Model\SubscriptionManager $subject,
-        \Magento\Newsletter\Model\Subscriber $result,
+        Subscriber $result,
         int $customerId,
         int $storeId
-    ) {
-        $this->unsubscribe($result, $customerId);
+    ): Subscriber {
+        $this->unsubscribe($result);
         return $result;
     }
 
-    public function subscribe($subscriber, $customerId = null)
+    /**
+     * @throws NoSuchEntityException
+     * @throws LocalizedException
+     */
+    public function subscribe(Subscriber $subscriber, ?int $customerId = null): void
     {
         $this->logger->info('Customer Subscribed to Newsletter', [
             'subscriber' => $subscriber->getData()
@@ -71,7 +79,7 @@ class SubscriptionManager
         if ($this->heyLoyaltyConfig->isEnabled()) {
 
             $listId = $this->heyLoyaltyConfig->getList();
-            if (!empty($listId)) {
+            if ($listId !== '' && $listId !== '0') {
                 $fields = [
                     'email' => $subscriber->getSubscriberEmail()
                 ];
@@ -89,14 +97,14 @@ class SubscriptionManager
         }
     }
 
-    public function unsubscribe($subscriber)
+    public function unsubscribe(Subscriber $subscriber): void
     {
         $this->logger->info('Customer Unsubscribed to Newsletter', [
             'subscriber' => $subscriber->getData()
         ]);
         if ($this->heyLoyaltyConfig->isEnabled()) {
             $listId = $this->heyLoyaltyConfig->getList();
-            if (!empty($listId)) {
+            if ($listId !== '' && $listId !== '0') {
                 $this->heyLoyaltyApi->deleteListMemberByEmail($listId, $subscriber->getSubscriberEmail());
             }
         }

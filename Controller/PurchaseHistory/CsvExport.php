@@ -4,27 +4,37 @@ namespace Wexo\HeyLoyalty\Controller\PurchaseHistory;
 
 use Exception;
 use Magento\Framework\App\Action\HttpGetActionInterface;
+use Magento\Framework\App\CacheInterface;
 use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\App\RequestInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\App\Response\Http\FileFactory;
+use Magento\Framework\App\ResponseFactory;
 use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Filesystem;
+use Magento\Store\Model\App\Emulation;
+use Magento\Store\Model\StoreManagerInterface;
+use Wexo\HeyLoyalty\Api\HeyLoyaltyApiInterface;
+use Wexo\HeyLoyalty\Api\HeyLoyaltyConfigInterface;
 
 class CsvExport implements HttpGetActionInterface
 {
     public function __construct(
         public ResourceConnection $connection,
-        public \Magento\Framework\App\RequestInterface $request,
-        public \Magento\Framework\App\ResponseFactory $responseFactory,
-        public \Magento\Store\Model\App\Emulation $emulation,
-        public \Magento\Store\Model\StoreManagerInterface $storeManager,
-        public \Wexo\HeyLoyalty\Api\HeyLoyaltyConfigInterface $config,
-        public \Wexo\HeyLoyalty\Api\HeyLoyaltyApiInterface $api,
-        public \Magento\Framework\App\CacheInterface $cache
+        public RequestInterface $request,
+        public ResponseFactory $responseFactory,
+        public Emulation $emulation,
+        public StoreManagerInterface $storeManager,
+        public HeyLoyaltyConfigInterface $config,
+        public HeyLoyaltyApiInterface $api,
+        public CacheInterface $cache
     ) {
     }
-    
+
+    /**
+     * @throws Exception
+     */
     public function execute(): ResponseInterface
     {
         $securityKeyParam = $this->request->getParam('security_key');
@@ -46,7 +56,10 @@ class CsvExport implements HttpGetActionInterface
         return $response;
     }
 
-    public function validate($storeId, $securityKeyParam)
+    /**
+     * @throws Exception
+     */
+    public function validate($storeId, $securityKeyParam): void
     {
         $securityKey = $this->api->generatePurchaseHistorySecurityKey();
         if($securityKeyParam !== $securityKey){

@@ -3,29 +3,36 @@
 namespace Wexo\HeyLoyalty\Model;
 
 use InvalidArgumentException;
+use Magento\Customer\Api\AddressRepositoryInterface;
 use Magento\Customer\Api\Data\CustomerInterface;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Serialize\Serializer\Json;
+use Magento\Store\Model\Information;
+use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\StoreManagerInterface;
+use Psr\Log\LoggerInterface;
 use Wexo\HeyLoyalty\Api\HeyLoyaltyConfigInterface;
 
 class HeyLoyaltyConfig implements HeyLoyaltyConfigInterface
 {
-    public const CONFIG_ENABLED = 'heyloyalty/general/enabled';
-    public const CONFIG_API_KEY = 'heyloyalty/general/api_key';
-    public const CONFIG_API_SECRET = 'heyloyalty/general/api_secret';
-    public const CONFIG_LIST = 'heyloyalty/general/list';
-    public const CONFIG_MAPPER = 'heyloyalty/general/mappings';
-    public const CONFIG_TRACKING_ACTIVATE = 'heyloyalty/tracking/enabled';
-    public const CONFIG_TRACKING_ID = 'heyloyalty/tracking/id';
-    public const CONFIG_SESSION_TIME = 'heyloyalty/tracking/session_time';
-    public const CONFIG_PURCHASE_HISTORY_ACTIVATE = 'heyloyalty/purchase_history/activate';
-    public const CONFIG_PURCHASE_HISTORY_ERROR_EMAIL = 'heyloyalty/purchase_history/error_email';
+    public const string CONFIG_ENABLED = 'heyloyalty/general/enabled';
+    public const string CONFIG_API_KEY = 'heyloyalty/general/api_key';
+    public const string CONFIG_API_SECRET = 'heyloyalty/general/api_secret';
+    public const string CONFIG_LIST = 'heyloyalty/general/list';
+    public const string CONFIG_MAPPER = 'heyloyalty/general/mappings';
+    public const string CONFIG_TRACKING_ACTIVATE = 'heyloyalty/tracking/enabled';
+    public const string CONFIG_TRACKING_ID = 'heyloyalty/tracking/id';
+    public const string CONFIG_SESSION_TIME = 'heyloyalty/tracking/session_time';
+    public const string CONFIG_PURCHASE_HISTORY_ACTIVATE = 'heyloyalty/purchase_history/activate';
+    public const string CONFIG_PURCHASE_HISTORY_ERROR_EMAIL = 'heyloyalty/purchase_history/error_email';
 
     public function __construct(
-        public \Magento\Framework\Serialize\Serializer\Json $json,
-        public \Magento\Store\Model\Information $storeInformation,
-        public \Magento\Store\Model\StoreManagerInterface $storeManager,
-        public \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
-        public \Magento\Customer\Api\AddressRepositoryInterface $addressRepository,
-        public \Psr\Log\LoggerInterface $logger
+        public Json $json,
+        public Information $storeInformation,
+        public StoreManagerInterface $storeManager,
+        public ScopeConfigInterface $scopeConfig,
+        public AddressRepositoryInterface $addressRepository,
+        public LoggerInterface $logger
     ) {
     }
 
@@ -33,7 +40,7 @@ class HeyLoyaltyConfig implements HeyLoyaltyConfigInterface
     {
         return $this->scopeConfig->getValue(
             self::CONFIG_ENABLED,
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE
         ) === '1';
     }
 
@@ -41,7 +48,7 @@ class HeyLoyaltyConfig implements HeyLoyaltyConfigInterface
     {
         return $this->scopeConfig->getValue(
             self::CONFIG_API_KEY,
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE
         ) ?? '';
     }
 
@@ -49,7 +56,7 @@ class HeyLoyaltyConfig implements HeyLoyaltyConfigInterface
     {
         return $this->scopeConfig->getValue(
             self::CONFIG_API_SECRET,
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE
         ) ?? '';
     }
 
@@ -57,7 +64,7 @@ class HeyLoyaltyConfig implements HeyLoyaltyConfigInterface
     {
         return $this->scopeConfig->getValue(
             self::CONFIG_TRACKING_ACTIVATE,
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE
         ) === '1';
     }
 
@@ -65,7 +72,7 @@ class HeyLoyaltyConfig implements HeyLoyaltyConfigInterface
     {
         return $this->scopeConfig->getValue(
             self::CONFIG_LIST,
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE
         ) ?? '';
     }
 
@@ -74,16 +81,16 @@ class HeyLoyaltyConfig implements HeyLoyaltyConfigInterface
         try {
             return $this->json->unserialize($this->scopeConfig->getValue(
                 self::CONFIG_MAPPER,
-                \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+                ScopeInterface::SCOPE_STORE
             )) ?? [];
-        } catch (InvalidArgumentException $e) {
+        } catch (InvalidArgumentException) {
             return [];
         }
     }
 
-    public function mapFields(CustomerInterface $customer = null): array
+    public function mapFields(?CustomerInterface $customer = null): array
     {
-        if (!$customer) {
+        if (!$customer instanceof CustomerInterface) {
             return [];
         }
         $fields = [];
@@ -103,14 +110,14 @@ class HeyLoyaltyConfig implements HeyLoyaltyConfigInterface
                     $magentoField = $mapping['magento_field'];
                     $heyLoyaltyField = $mapping['heyloyalty_field'];
                     switch (true) {
-                        case str_contains($magentoField, 'store'):
+                        case str_contains((string) $magentoField, 'store'):
                             $fields[$heyLoyaltyField] = $storeInformation->getData(str_replace('store_', '', $magentoField));
                             break;
-                        case str_contains($magentoField, 'shipping'):
+                        case str_contains((string) $magentoField, 'shipping'):
                             $methodName = $this->generateMethodName($magentoField, 'shipping');
                             $fields[$heyLoyaltyField] = $this->getFieldValue($shippingAddress, $magentoField, 'shipping');
                             break;
-                        case str_contains($magentoField, 'billing'):
+                        case str_contains((string) $magentoField, 'billing'):
                             $fields[$heyLoyaltyField] = $this->getFieldValue($billingAddress, $magentoField, 'billing');
                             break;
                         default:
@@ -119,7 +126,7 @@ class HeyLoyaltyConfig implements HeyLoyaltyConfigInterface
                     }
                 }catch(\Throwable $e){
                     $this->logger->debug(
-                        'Wexo_HeyLoyaltyConfig::mapFields Error finding map for ' . $magentoField . ' and ' . $heyLoyaltyField, 
+                        'Wexo_HeyLoyaltyConfig::mapFields Error finding map for ' . $magentoField . ' and ' . $heyLoyaltyField,
                         [
                             'customer' => $customer->getEmail(),
                             'mappings' => $mappings,
@@ -129,16 +136,16 @@ class HeyLoyaltyConfig implements HeyLoyaltyConfigInterface
                     );
                 }
             }
-        } catch (\Exception $e) {  
+        } catch (\Exception $e) {
             $this->logger->debug(
-                '\Wexo\HeyLoyalty\Model\HeyLoyaltyConfig::mapFields ERROR', 
+                '\Wexo\HeyLoyalty\Model\HeyLoyaltyConfig::mapFields ERROR',
                 [
                     'customer' => $customer->getEmail(),
                     'error' => $e->getMessage()
                 ]
             );
         }
-        $this->logger->debug('\Wexo\HeyLoyalty\Model\HeyLoyaltyConfig::mapFields', 
+        $this->logger->debug('\Wexo\HeyLoyalty\Model\HeyLoyaltyConfig::mapFields',
             [
                 'customer' => $customer->getEmail(),
                 'mappings' => $mappings,
@@ -148,14 +155,13 @@ class HeyLoyaltyConfig implements HeyLoyaltyConfigInterface
         return $fields;
     }
 
-    public function generateMethodName($field, $prefix = '')
+    public function generateMethodName($field, $prefix = ''): string
     {
         $field = str_replace($prefix, '', $field);
-        $methodName = 'get' . str_replace('_', '', ucwords($field, '_'));
-        return $methodName;
+        return 'get' . str_replace('_', '', ucwords($field, '_'));
     }
 
-    private function getFieldValue($object, $field, $prefix = '')
+    private function getFieldValue($object, $field, string $prefix = ''): string
     {
         $methodName = $this->generateMethodName($field, $prefix);
         $value = $object->$methodName();
@@ -169,7 +175,7 @@ class HeyLoyaltyConfig implements HeyLoyaltyConfigInterface
     {
         return $this->scopeConfig->getValue(
             self::CONFIG_TRACKING_ID,
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE
         ) ?? '';
     }
 
@@ -177,7 +183,7 @@ class HeyLoyaltyConfig implements HeyLoyaltyConfigInterface
     {
         return $this->scopeConfig->getValue(
             self::CONFIG_SESSION_TIME,
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE
         ) ?? '';
     }
 
@@ -185,7 +191,7 @@ class HeyLoyaltyConfig implements HeyLoyaltyConfigInterface
     {
         return $this->scopeConfig->getValue(
             self::CONFIG_PURCHASE_HISTORY_ACTIVATE,
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE
         ) === '1';
     }
 
@@ -193,7 +199,7 @@ class HeyLoyaltyConfig implements HeyLoyaltyConfigInterface
     {
         return $this->scopeConfig->getValue(
             self::CONFIG_PURCHASE_HISTORY_ERROR_EMAIL,
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE
         ) ?? '';
     }
 }

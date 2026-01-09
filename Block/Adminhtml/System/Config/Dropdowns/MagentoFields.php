@@ -11,6 +11,7 @@ class MagentoFields extends AbstractSelect
      *
      * @return array[]
      */
+    #[\Override]
     public function getSourceOptions(): array
     {
         return [

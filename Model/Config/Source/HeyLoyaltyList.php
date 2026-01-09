@@ -14,8 +14,6 @@ class HeyLoyaltyList implements OptionSourceInterface
 
     /**
      * Create list option array
-     *
-     * @return array
      */
     public function toOptionArray(): array
     {

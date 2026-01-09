@@ -2,21 +2,23 @@
 
 namespace Wexo\HeyLoyalty\Block\Adminhtml\System\Config;
 
+use Magento\Backend\Block\Template\Context;
 use Magento\Config\Block\System\Config\Form\Field;
 use Magento\Framework\Data\Form\Element\AbstractElement;
+use Wexo\HeyLoyalty\Api\HeyLoyaltyApiInterface;
 
 class ExportButton extends Field
 {
     /** @var string  */
-    const ADMIN_CONTROLLER_URL = "heyloyalty/purchasehistory/markforexport";
-    const FRONTEND_CONTROLLER_URL = "/wexo_heyloyalty/purchasehistory/csvexport";
+    const string ADMIN_CONTROLLER_URL = "heyloyalty/purchasehistory/markforexport";
+    const string FRONTEND_CONTROLLER_URL = "/wexo_heyloyalty/purchasehistory/csvexport";
 
     /** @var string  */
     public $_template = "Wexo_HeyLoyalty::system/config/export_button.phtml";
 
     public function __construct(
-        public \Wexo\HeyLoyalty\Api\HeyLoyaltyApiInterface $api,
-        private \Magento\Backend\Block\Template\Context $context,
+        public HeyLoyaltyApiInterface $api,
+        Context $context,
         array $data = []
     )
     {
@@ -46,9 +48,6 @@ class ExportButton extends Field
 
     /**
      * Generate button html
-     *
-     * @param AbstractElement $element
-     * @return string
      */
     public function _getElementHtml(AbstractElement $element): string
     {

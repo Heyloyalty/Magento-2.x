@@ -23,11 +23,12 @@ class HeyLoyaltyFields extends AbstractSelect
      *
      * @return array[]
      */
+    #[\Override]
     public function getSourceOptions(): array
     {
         $fields = [];
         $list = $this->api->getList($this->config->getList());
-        if(empty($list) || empty($list['fields'])){
+        if($list === [] || empty($list['fields'])){
             return [
                 [
                     'label' => 'Select a List to see fields',

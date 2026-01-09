@@ -26,7 +26,7 @@ These are all required by magento by default
 
 On first setup no lists or mappings will be available. Once you have entered your `Api Key` and `Api Secret` (Hit the save button) your lists and fields will be available for editting
 
-![HeyLoyalty Configuration](./images/heyloyalty_config_1.png)
+![HeyLoyalty Configuration](images/heyloyalty_config_1.png)
 
 #### Purchase History and Tracking
 
@@ -34,7 +34,7 @@ If you want to provide HeyLoyalty with the last 2 years of orders you can use th
 
 If you want to verify the data before you send it, you can click the first link (`Verify Purchase History CSV (Last 2 years)`) This will download a CSV file where you can verify the data before submitting it.
 
-![HeyLoyalty Configuration](./images/heyloyalty_config_2.png)
+![HeyLoyalty Configuration](images/heyloyalty_config_2.png)
 
 
 ## Developer Guide:

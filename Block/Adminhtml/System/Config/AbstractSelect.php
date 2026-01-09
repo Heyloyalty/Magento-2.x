@@ -9,10 +9,10 @@ abstract class AbstractSelect extends Select
     /**
      * Set input name
      *
-     * @param $value
+     * @param string $value
      * @return mixed
      */
-    public function setInputName($value): mixed
+    public function setInputName(string $value): mixed
     {
         return $this->setName($value);
     }
@@ -20,18 +20,16 @@ abstract class AbstractSelect extends Select
     /**
      * Set input id
      *
-     * @param $value
+     * @param string $value
      * @return AbstractSelect
      */
-    public function setInputId($value): AbstractSelect
+    public function setInputId(string $value): AbstractSelect
     {
         return $this->setId($value);
     }
 
     /**
      * Convert to HTML
-     *
-     * @return string
      */
     public function _toHtml(): string
     {
@@ -43,8 +41,6 @@ abstract class AbstractSelect extends Select
 
     /**
      * Get source options
-     *
-     * @return array
      */
     public function getSourceOptions(): array
     {
@@ -53,8 +49,6 @@ abstract class AbstractSelect extends Select
 
     /**
      * Get extra parameters
-     *
-     * @return string
      */
     public function getExtraParams(): string
     {

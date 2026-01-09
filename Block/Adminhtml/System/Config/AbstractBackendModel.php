@@ -13,7 +13,6 @@ use Magento\Framework\Serialize\SerializerInterface;
 
 abstract class AbstractBackendModel extends ConfigValue
 {
-    /** @var SerializerInterface $serializer */
     protected SerializerInterface $serializer;
     
     public function __construct(
@@ -22,8 +21,8 @@ abstract class AbstractBackendModel extends ConfigValue
         Registry $registry,
         ScopeConfigInterface $config,
         TypeListInterface $cacheTypeList,
-        AbstractResource $resource = null,
-        AbstractDb $resourceCollection = null,
+        ?AbstractResource $resource = null,
+        ?AbstractDb $resourceCollection = null,
         array $data = []
     ) {
         $this->serializer = $serializer;
@@ -32,8 +31,6 @@ abstract class AbstractBackendModel extends ConfigValue
 
     /**
      * Unset __empty and serialize value before saving
-     *
-     * @return void
      */
     public function beforeSave(): void
     {
@@ -47,8 +44,6 @@ abstract class AbstractBackendModel extends ConfigValue
 
     /**
      * Unserialize value before loading
-     *
-     * @return void
      */
     protected function _afterLoad(): void
     {

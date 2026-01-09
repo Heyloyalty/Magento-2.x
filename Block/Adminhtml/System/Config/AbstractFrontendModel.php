@@ -13,18 +13,10 @@ use Magento\Framework\View\Element\Html\Select;
 
 class AbstractFrontendModel extends AbstractFieldArray
 {
-    /** @var bool|BlockInterface */
     public BlockInterface|bool $selectOptions;
-    /** @var bool|BlockInterface */
     public BlockInterface|bool $heyLoyaltyFields = false;
-    /** @var bool|BlockInterface */
     public BlockInterface|bool $magentoFields = false;
 
-    /**
-     * @param Context $context
-     * @param Registry $coreRegistry
-     * @param array $data
-     */
     public function __construct(
         Context $context,
         public Registry $coreRegistry,
@@ -36,8 +28,6 @@ class AbstractFrontendModel extends AbstractFieldArray
     /**
      * Prepare array row
      *
-     * @param DataObject $row
-     * @return void
      * @throws LocalizedException
      */
     protected function _prepareArrayRow(DataObject $row): void
@@ -53,10 +43,9 @@ class AbstractFrontendModel extends AbstractFieldArray
     /**
      * Get select field options
      *
-     * @return mixed
      * @throws LocalizedException
      */
-    private function getSelectFieldOptions(): mixed
+    private function getSelectFieldOptions(): BlockInterface|bool
     {
         if (!$this->selectOptions) {
             $this->selectOptions = $this->getLayout()->createBlock(

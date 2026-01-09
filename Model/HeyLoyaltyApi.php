@@ -2,6 +2,8 @@
 
 namespace Wexo\HeyLoyalty\Model;
 
+use Magento\Framework\App\CacheInterface;
+use Magento\Framework\App\ResourceConnection;
 use Wexo\HeyLoyalty\Api\HeyLoyaltyApiInterface;
 use Wexo\HeyLoyalty\Api\HeyLoyaltyClientInterface;
 use Wexo\HeyLoyalty\Api\HeyLoyaltyConfigInterface;
@@ -11,8 +13,8 @@ class HeyLoyaltyApi implements HeyLoyaltyApiInterface
     public function __construct(
         public HeyLoyaltyConfigInterface $config,
         public HeyLoyaltyClientInterface $client,
-        public \Magento\Framework\App\ResourceConnection $connection,
-        public \Magento\Framework\App\CacheInterface $cache
+        public ResourceConnection $connection,
+        public CacheInterface $cache
     ) {
     }
 
@@ -103,7 +105,7 @@ class HeyLoyaltyApi implements HeyLoyaltyApiInterface
                 soi.product_type != "configurable"
                 and
                 so.created_at > DATE_SUB(NOW(),INTERVAL 2 YEAR)
-                and 
+                and
                 so.store_id = :store_id
             order by so.customer_id;
         ';
@@ -114,13 +116,13 @@ class HeyLoyaltyApi implements HeyLoyaltyApiInterface
         $data = $connection->fetchAll($query, $bind);
         $csv = [];
         if (!empty($data)) {
-            $headers = join(',', array_keys($data[0]));
+            $headers = implode(',', array_keys($data[0]));
             $csv[] = $headers;
             foreach ($data as $row) {
-                $csv[] = join(',', array_values($row));
+                $csv[] = implode(',', array_values($row));
             }
         }
-        $output = join(PHP_EOL, $csv);
+        $output = implode(PHP_EOL, $csv);
         $this->cache->save($output, $cacheKey, ['cms_block'], 3600);
         return $output;
     }
