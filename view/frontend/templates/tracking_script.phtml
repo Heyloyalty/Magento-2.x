@@ -1,6 +1,6 @@
 <?php $viewModel = $block->getViewModel(); ?>
 <?php if ($viewModel->getIsTrackingActivated()) : ?>
-    
+
 <?php
     $apiKey = $viewModel->getApiKey();
     $sessionTime = $viewModel->getSessionTime();
@@ -39,9 +39,9 @@
     <!-- hlt.visit(productid, categoryid, categoryname)/()/(,,categoryname) -->
     <script>
         function hltVisit() {
-            let productId = "<?= $product?->getSku() ?? 'null' ?>";
-            let categoryId = "<?= $category?->getId() ?? 'null' ?>";
-            let categoryName = "<?= $category?->getName() ?? null ?>";
+            let productId = "<?= $escaper->escapeHtml($product?->getSku() ?? 'null') ?>";
+            let categoryId = "<?= $escaper->escapeHtml($category?->getId() ?? 'null') ?>";
+            let categoryName = "<?= $escaper->escapeHtml($category?->getName() ?? null) ?>";
             console.debug('HeyLoyalty :: HIT', {
                 productId,
                 categoryId,
@@ -56,9 +56,9 @@
                 return;
             }
             window.hlt.visit(
-                "<?= $product?->getSku() ?? '' ?>",
-                "<?= $category?->getId() ?? '' ?>",
-                "<?= $category?->getName() ?? '' ?>"
+                "<?= $escaper->escapeHtml($product?->getSku() ?? '') ?>",
+                "<?= $escaper->escapeHtml($category?->getId() ?? '') ?>",
+                "<?= $escaper->escapeHtml($category?->getName() ?? '') ?>"
             );
         }
     </script>
@@ -70,11 +70,11 @@
             console.debug('HeyLoyalty :: AddToBasket', [
                 productId,
                 qty,
-                "<?= $category?->getId() ?? '' ?>",
-                "<?= $quoteId ?>",
-                "<?= $category?->getName() ?? '' ?>"
+                "<?= $escaper->escapeHtml($category?->getId() ?? '') ?>",
+                "<?= $escaper->escapeHtml($quoteId) ?>",
+                "<?= $escaper->escapeHtml($category?->getName() ?? '') ?>"
             ]);
-            window.hlt.addToBasket(productId, "1", "<?= $category?->getId() ?? '' ?>", "<?= $quoteId ?>", "<?= $category?->getName() ?? '' ?>");
+            window.hlt.addToBasket(productId, "1", "<?= $escaper->escapeHtml($category?->getId() ?? '') ?>", "<?= $escaper->escapeHtml($quoteId) ?>", "<?= $escaper->escapeHtml($category?->getName() ?? '') ?>");
         }
     </script>
 

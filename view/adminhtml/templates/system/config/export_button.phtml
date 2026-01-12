@@ -12,6 +12,6 @@ use Wexo\HeyLoyalty\Block\Adminhtml\System\Config\ExportButton;
     </a>
     <br>
     <a id="<?= $escaper->escapeHtml($block->getId()) ?>_trigger" href="<?= $escaper->escapeHtml($block->getAdminControllerURL()) ?>" class="action-add">
-        <span><?= __('Send to HeyLoyalty') ?></span>
+        <span><?= $escaper->escapeHtml(__('Send to HeyLoyalty')) ?></span>
     </a>
 </div>
