@@ -113,37 +113,37 @@
 
 
     <script>
-        require(['Magento_Customer/js/customer-data'], function(customerData) {
-            let cart = customerData.get('cart');
-            let init = true;
-            let initialCartData = [];
-            cart.subscribe(function() {
-                if (init) {
-                    initialCartData = cart().items.map(item => {
-                        return {
-                            product_id: item.product_id,
-                            qty: item.qty,
-                            product_sku: item.product_sku
-                        }
-                    })
-                    init = false;
-                }
-                let cartUpdatedData = cart().items.map(item => {
+        require([
+            'Magento_Customer/js/customer-data',
+            'jquery'
+        ], function(customerData, $) {
+            $.when(customerData.getInitCustomerData()).done(function () {
+                let cart = customerData.get('cart');
+                let initialCartData = (cart().items || []).map(item => {
                     return {
                         product_id: item.product_id,
                         qty: item.qty,
                         product_sku: item.product_sku
                     }
                 });
-                let add_to_cart = getAddedItems(initialCartData, cartUpdatedData);
-                let remove_from_cart = getRemovedItems(initialCartData, cartUpdatedData);
-                add_to_cart.forEach(function(item) {
-                    hltAddToBasket(item.product_sku, item.qty);
+                cart.subscribe(function() {
+                    let cartUpdatedData = cart().items.map(item => {
+                        return {
+                            product_id: item.product_id,
+                            qty: item.qty,
+                            product_sku: item.product_sku
+                        }
+                    });
+                    let add_to_cart = getAddedItems(initialCartData, cartUpdatedData);
+                    let remove_from_cart = getRemovedItems(initialCartData, cartUpdatedData);
+                    add_to_cart.forEach(function(item) {
+                        hltAddToBasket(item.product_sku, item.qty);
+                    });
+                    remove_from_cart.forEach(function(item) {
+                        hltRemoveFromBasket(item.product_sku);
+                    });
+                    initialCartData = cartUpdatedData;
                 });
-                remove_from_cart.forEach(function(item) {
-                    hltRemoveFromBasket(item.product_sku);
-                });
-                initialCartData = cartUpdatedData;
             });
         });
 
